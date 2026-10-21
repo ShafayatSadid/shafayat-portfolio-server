@@ -18,12 +18,10 @@ router.get("/", async (req: Request, res: Response) => {
 router.get("/edit/:id", verifyAdmin, async (req: Request<{ id: string }>, res: Response) => {
   const { db } = await connectToDatabase();
   const id = req.params.id;
-
   if (!ObjectId.isValid(id)) {
     res.status(400).json({ error: "Invalid ObjectId" });
     return;
   }
-
   const project = await db.collection<Project>("projects").findOne({ _id: new ObjectId(id) });
   if (!project) {
     res.status(404).json({ error: "Project not found" });
@@ -45,12 +43,10 @@ router.post("/", verifyAdmin, async (req: Request, res: Response) => {
 router.put("/:id", verifyAdmin, async (req: Request<{ id: string }>, res: Response) => {
   const { db } = await connectToDatabase();
   const id = req.params.id;
-
   if (!ObjectId.isValid(id)) {
     res.status(400).json({ error: "Invalid ObjectId" });
     return;
   }
-
   const body = req.body as Partial<Project>;
   const result = await db.collection<Project>("projects").updateOne({ _id: new ObjectId(id) }, { $set: body });
   res.status(200).json({ message: "Updated successfully", modifiedCount: result.modifiedCount });
@@ -60,14 +56,28 @@ router.put("/:id", verifyAdmin, async (req: Request<{ id: string }>, res: Respon
 router.delete("/:id", verifyAdmin, async (req: Request<{ id: string }>, res: Response) => {
   const { db } = await connectToDatabase();
   const id = req.params.id;
-
   if (!ObjectId.isValid(id)) {
     res.status(400).json({ error: "Invalid ObjectId" });
     return;
   }
-
   const result = await db.collection<Project>("projects").deleteOne({ _id: new ObjectId(id) });
   res.status(200).json({ message: "Deleted successfully", deletedCount: result.deletedCount });
+});
+
+// ৬. GET: পাবলিক ডিটেইলস (সবচেয়ে নিচে রাখতে হবে)
+router.get("/:id", async (req: Request<{ id: string }>, res: Response) => {
+  const { db } = await connectToDatabase();
+  const id = req.params.id;
+  if (!ObjectId.isValid(id)) {
+    res.status(400).json({ error: "Invalid ObjectId" });
+    return;
+  }
+  const project = await db.collection<Project>("projects").findOne({ _id: new ObjectId(id) });
+  if (!project) {
+    res.status(404).json({ error: "Project not found" });
+    return;
+  }
+  res.status(200).json(project);
 });
 
 export default router;
