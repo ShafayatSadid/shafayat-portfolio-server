@@ -4,7 +4,8 @@ import cors from "cors";
 import testimonialRoutes from "./routes/testimonials.js";
 import contactRoutes from "./routes/contact.js";
 import projectRoutes from "./routes/projects.js";
-import blogRoutes from "./routes/blogs.js"; // নতুন রাউট
+import blogRoutes from "./routes/blogs.js";
+import dashboardRoutes from "./routes/dashboard.js"; // নতুন ইমপোর্ট
 
 const app = express();
 
@@ -18,7 +19,8 @@ app.get("/api/health", (req: Request, res: Response) => {
 app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/projects", projectRoutes);
-app.use("/api/blogs", blogRoutes); // রাউট যুক্ত করা হলো
+app.use("/api/blogs", blogRoutes);
+app.use("/api/dashboard", dashboardRoutes); // রাউট যুক্ত করা হলো
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
