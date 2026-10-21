@@ -18,7 +18,26 @@ router.get("/", async (req: Request, res: Response) => {
   res.status(200).json(blogs);
 });
 
-// ২. GET: নির্দিষ্ট একটি ব্লগ (পাবলিক)
+// ২. GET: নির্দিষ্ট একটি ব্লগ এডিটের জন্য (_id দিয়ে - শুধু অ্যাডমিন)
+router.get("/edit/:id", verifyAdmin, async (req: Request<{ id: string }>, res: Response) => {
+  const { db } = await connectToDatabase();
+  const id = req.params.id;
+
+  if (!ObjectId.isValid(id)) {
+    res.status(400).json({ error: "Invalid ObjectId" });
+    return;
+  }
+
+  const blog = await db.collection<BlogPost>("blogs").findOne({ _id: new ObjectId(id) });
+
+  if (!blog) {
+    res.status(404).json({ error: "Blog not found" });
+    return;
+  }
+  res.status(200).json(blog);
+});
+
+// ৩. GET: নির্দিষ্ট একটি ব্লগ (slug দিয়ে - পাবলিক)
 router.get("/:slug", async (req: Request<{ slug: string }>, res: Response) => {
   const { db } = await connectToDatabase();
   const blog = await db.collection<BlogPost>("blogs").findOne({ slug: req.params.slug });
@@ -30,7 +49,7 @@ router.get("/:slug", async (req: Request<{ slug: string }>, res: Response) => {
   res.status(200).json(blog);
 });
 
-// ৩. POST: নতুন ব্লগ তৈরি (শুধু অ্যাডমিন)
+// ৪. POST: নতুন ব্লগ তৈরি (শুধু অ্যাডমিন)
 router.post("/", verifyAdmin, async (req: Request, res: Response) => {
   const { db } = await connectToDatabase();
   const body = req.body as Omit<BlogPost, "_id" | "createdAt">;
@@ -44,7 +63,7 @@ router.post("/", verifyAdmin, async (req: Request, res: Response) => {
   res.status(201).json({ ...newBlog, _id: result.insertedId });
 });
 
-// ৪. PUT: ব্লগ আপডেট (শুধু অ্যাডমিন)
+// ৫. PUT: ব্লগ আপডেট (শুধু অ্যাডমিন)
 router.put("/:id", verifyAdmin, async (req: Request<{ id: string }>, res: Response) => {
   const { db } = await connectToDatabase();
   const id = req.params.id;
@@ -63,7 +82,7 @@ router.put("/:id", verifyAdmin, async (req: Request<{ id: string }>, res: Respon
   res.status(200).json({ message: "Updated successfully", modifiedCount: result.modifiedCount });
 });
 
-// ৫. DELETE: ব্লগ ডিলিট (শুধু অ্যাডমিন)
+// ৬. DELETE: ব্লগ ডিলিট (শুধু অ্যাডমিন)
 router.delete("/:id", verifyAdmin, async (req: Request<{ id: string }>, res: Response) => {
   const { db } = await connectToDatabase();
   const id = req.params.id;
